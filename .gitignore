@@ -1,0 +1,14 @@
+# Compiled source #
+*.exe
+
+# Packages #
+*.jar
+*.sqlite
+
+db.png
+alcora.iml
+out/
+.idea/
+
+*test*
+ 
