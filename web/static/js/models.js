@@ -1,42 +1,68 @@
 var ObjectModel = function(objectInfo) {
-  var info = objectInfo;  // verify all the fields
+    var info = objectInfo;  // verify all the fields
+    var card = null;
+    var cardOpened = false;
 
-  this.getId = function () { return info.id };
+    this.marker = null;
 
-  this.getCoords = function() { return [info.lat_coordinate, info.lng_coordinate] };
+    this.isCardOpened = function () { return cardOpened; };
 
-  this.getTitle = function() { return info.title };
+    this.getId = function () { return info.id };
 
-  this.getDescription = function() { return info.description };
+    this.getCoords = function() { return [info.lat_coordinate, info.lng_coordinate] };
 
-  this.getAddress = function() { return info.address };
+    this.getTitle = function() { return info.title };
 
-  this.getCategoryId = function() { return info.type_id };
+    this.getDescription = function() { return info.description };
 
-  this.getCategory = function() { return categories[info.type_id] };
+    this.getAddress = function() { return info.address };
 
-  this.getComments = function() {
-      return getComments(info.id);
-  };
+    this.getCategoryId = function() { return info.type_id };
 
-  this.addComment = function(newComment) {
-      if (!addComment(info.id, newComment)) {
-          console.log("ERROR");
-      }
-  };
+    this.getCategory = function() { return categories[info.type_id] };
 
-  this.getRating = function() { return info.average_rating };
+    this.getComments = function() {
+        return getComments(info.id);
+    };
 
-  this.getNumVotes = function () { return info.num_votes };
+    this.addComment = function(newComment) {
+        if (!addComment(info.id, newComment)) {
+            console.log("ERROR");
+        }
+    };
 
-  this.addRating = function (rating, userId, created) {
-      if (!addRating(info.id)) {
-          console.log("ERROR");
-          return null;
-      }
-      info.average_rating = (info.average_rating * info.num_votes + rating) / (info.num_votes + 1);
-      ++info.num_votes;
-  };
+    this.getRating = function() { return info.average_rating };
+
+    this.getNumVotes = function () { return info.num_votes };
+
+    this.addRating = function (rating, userId, created) {
+        if (!addRating(info.id)) {
+            console.log("ERROR");
+            return null;
+        }
+        info.average_rating = (info.average_rating * info.num_votes + rating) / (info.num_votes + 1);
+        ++info.num_votes;
+    };
+
+    this.addMarker = function () {
+        this.marker = new ObjectMarker(this);
+    };
+
+    this.openCard = function() {
+        card = new ObjectCard(this);
+        card.addTo(mymap);
+        card.displayCard();
+        objectsWithOpenedCards.push(this);
+        cardOpened = true;
+    };
+
+    this.closeCard = function() {
+        if (card) {
+            card.remove();
+            objectsWithOpenedCards.pop();
+            cardOpened = false;
+        }
+    };
 };
 
 

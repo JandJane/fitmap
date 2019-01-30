@@ -1,6 +1,6 @@
 var displayObject = function (object) {
-    var marker = new ObjectMarker(object);
-    layers[categories[object.getCategoryId()]].addLayer(marker.marker);
+    object.addMarker();
+    layers[categories[object.getCategoryId()]].addLayer(object.marker.marker);
 };
 
 var displayObjects = function(objects) {

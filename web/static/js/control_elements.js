@@ -205,7 +205,7 @@ var ObjectCard = L.Control.extend({
     onAddComment: function () {
         var newComment = {
             object_id: this.object.getId(),
-            created: Date(),
+            created: new Date().toISOString().slice(0,10),
             author_id: 3,
             text: $('#comment').val()
         };
@@ -227,39 +227,21 @@ var NewObjectMarker = function(coords) {
 
 
 var ObjectMarker = function (objectModel) {
-  var object = objectModel,
-      card = null,
-      cardOpened = false;
+  var object = objectModel;
 
   this.marker = L.marker(object.getCoords());
 
   var onClick = function(e) {
-      if (cardOpened) {
-          this.closeCard();
+      if (object.isCardOpened()) {
+          object.closeCard();
       } else {
           closeAllCards();
           if (createObjectManager.isCreating()) {
               createObjectManager.cancelCreating();
           }
-          this.openCard();
+          object.openCard();
       }
   };
 
   this.marker.addEventListener('click', onClick.bind(this));
-
-  this.openCard = function() {
-      card = new ObjectCard(object);
-      card.addTo(mymap);
-      card.displayCard();
-      objectsWithOpenedCards.push(this);
-      cardOpened = true;
-  };
-
-  this.closeCard = function() {
-      if (card) {
-          card.remove();
-          objectsWithOpenedCards.pop();
-          cardOpened = false;
-      }
-  };
 };

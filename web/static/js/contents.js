@@ -61,7 +61,7 @@ var renderObjectCard = function(container, object, comments, onAddComment) {
     $(container).empty();
 
     var img = $('<img />', {src: 'img/close.png', width: '15px', height: '15px'})
-        .click(object.closeCard());
+        .click(object.closeCard);
     var header = $('<div />', {class: 'card-header'}).append(img);
     $(container).append(header);
 
