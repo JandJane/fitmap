@@ -1,6 +1,7 @@
 var renderCreateObjectDialog = function(container) {
     var header = $('<div></div>').addClass('flex-container')
-        .append($('<h3></h3>').text('Создание объекта'));
+        .append($('<p></p>')
+            .append($('<h3></h3>').text('Создание объекта')));
 
     var address_form = $('<form></form>')
         .prop('action', '#');
@@ -24,12 +25,17 @@ var renderCreateObjectDialog = function(container) {
             $('<p></p>').text("Или просто укажите его кликом по карте"),
             next_step_button);
 
+    var save_button = $('<button></button>')
+        .prop('disabled', true)
+        .click(createObjectManager.saveObject)
+        .text('Сохранить');
     var data_form = $('<form></form>')
         .prop('action', '#');
     var title_input = $('<input>')
         .prop('type', 'text')
         .prop('name', 'title')
-        .prop('placeholder', 'Название');
+        .prop('placeholder', 'Название')
+        .on('input', createObjectManager.enableSave(save_button));
     var description_input = $('<textarea>')
         .prop('id', 'description')
         .prop('placeholder', 'Описание');
@@ -44,12 +50,10 @@ var renderCreateObjectDialog = function(container) {
             $('<input>')
                 .prop('type', 'radio')
                 .prop('name', 'category')
-                .prop('value', category),
+                .prop('value', category)
+                .on('input', createObjectManager.enableSave(save_button)),
             $('<span></span>').text(categories[category])));
     }
-    var save_button = $('<button></button>')
-        .click(createObjectManager.saveObject)
-        .text('Сохранить');
     var step_two = $('<div></div>').addClass('hidden')
         .append(
             data_form,
@@ -65,16 +69,16 @@ var renderObjectCard = function(container, object, comments, onAddComment) {
     var header = $('<div />', {class: 'card-header'}).append(img);
     $(container).append(header);
 
-    var title = $('<p />').append($('<h3 />', {text: object.getTitle()}));
-    var address = $('<p />', {text: object.getAddress()});
+    var title = $('<p />').append($('<h3 />', {text: object.getTitle(), class: 'important'}));
+    var category = $('<p />', {text: object.getCategory(), class: 'not-important'});
+    var address = $('<p />', {text: object.getAddress(), class: 'not-important'});
     var description = $('<p />', {text: object.getDescription()});
-    var category = $('<p />', {text: object.getCategory()});
-    var infoBlock = $('<div />', {class: 'card-info-block'}).append(title, address, description, category);
+    var infoBlock = $('<div />', {class: 'card-info-block'}).append(title, category, address, description);
     $(container).append(infoBlock);
 
 
-    var currentRating = $('<p />', {text: "Рейтинг: " + object.getRating()});
-    var numVotes = $('<p />', {text: "Оценок: " + object.getNumVotes()});
+    var currentRating = $('<p />', {text: "Рейтинг: " + object.getRating(), class: 'not-important'});
+    var numVotes = $('<p />', {text: "Оценок: " + object.getNumVotes(), class: 'not-important'});
     var rate = $('<div />', {
         'class': 'divClass',
         'data-webRating': 2.5,
@@ -90,8 +94,8 @@ var renderObjectCard = function(container, object, comments, onAddComment) {
     comments.forEach(function(comment) {
         displayCommentsBlock.append(
             $('<div />').append(
-                $('<p />', {text: comment.author_id}),
-                $('<p />', {text: comment.created}),
+                $('<p />', {text: comment.author_id, class: 'important'}),
+                $('<p />', {text: comment.created, class: 'not-important'}),
                 $('<p />', {text: comment.text})
             )
         );

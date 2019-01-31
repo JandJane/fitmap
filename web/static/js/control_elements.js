@@ -32,7 +32,7 @@ var CreateObjectManager = function (myMap) {
         } else {
             marker = new NewObjectMarker(coords);
             marker.addTo(map);
-            $('.dialog button').prop('disabled', false);
+            $('.dialog button:first').prop('disabled', false);
         }
 
         map.setView(coords);
@@ -68,6 +68,16 @@ var CreateObjectManager = function (myMap) {
         if (creating) {
             var coords = e.latlng;
             this.addMarker(coords);
+        }
+    };
+
+    this.enableSave = function(saveButton) {
+        return function() {
+            if ($('input[name*="title"]').val() && $('input[name="category"]:checked').val()) {
+                $(saveButton).prop('disabled', false);
+            } else {
+                $(saveButton).prop('disabled', true);
+            }
         }
     };
 
@@ -119,6 +129,7 @@ var CreateObjectManager = function (myMap) {
         this.cancelCreating();
     };
 
+    this.enableSave = this.enableSave.bind(this);
     this.saveObject = this.saveObject.bind(this);
     this.onClick = this.onClick.bind(this);
     this.createObject = this.createObject.bind(this);
