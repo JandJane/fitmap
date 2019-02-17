@@ -78,7 +78,7 @@ button:disabled {
     justify-content: space-between;
     max-height: 50%;
     min-height: 50%;
-    min-width: 30%;
+    width: 320px;
     padding: 15px;
 }
 
@@ -92,16 +92,24 @@ button:disabled {
     font-size: 13px;
     justify-content: space-between;
     max-height: 300px;
-    max-width: 38%;
-    min-width: 100px;
+    width: 320px;
     overflow-y: scroll;
     padding: 15px;
 }
 
 .card-header {
+    flex: 1 0 auto;
     display: flex;
     flex-direction: row-reverse;
     justify-content: flex-start;
+}
+
+.card-promotion-block {
+    display: flex;
+    flex: 1 0 auto;
+    flex-direction: row;
+    justify-content: flex-start;
+    margin-bottom: 1em;
 }
 
 .card-info-block {
@@ -129,12 +137,20 @@ button:disabled {
     margin-bottom: 1em;
 }
 
-.card-add-comment-block {
+.card-add-block {
     display: flex;
     flex: 1 0 auto;
     flex-direction: row;
     flex-wrap: wrap;
     justify-content: space-around;
+}
+
+.card-owner-block {
+    display: flex;
+    flex: 1 0 auto;
+    flex-direction: row;
+    flex-wrap: wrap;
+    margin-top: 1.5em;
 }
 
 .hidden {

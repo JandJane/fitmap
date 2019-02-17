@@ -21,27 +21,57 @@ var ObjectModel = function(objectInfo) {
 
     this.getCategory = function() { return categories[info.type_id] };
 
-    this.getComments = function() {
-        return getComments(info.id);
+    this.getOwnerId = function() { return info.owner_id; };
+
+    this.getCreationDate = function() { return info.created; };
+
+    this.getParentMultiobject = function () { return info.parent_multiobject; };
+
+    this.getComments = function(callbackFunc) {
+        return getComments(info.id, callbackFunc);
     };
 
-    this.addComment = function(newComment) {
-        if (!addComment(info.id, newComment)) {
-            console.log("ERROR");
-        }
+    this.addComment = function(newComment, callbackFunc) {
+        var newCallbackFunc = function(error) {
+            if (error) {
+                console.log(error);
+            } else {
+                callbackFunc();
+            }
+        };
+        addComment(info.id, newComment, newCallbackFunc);
     };
 
-    this.getRating = function() { return info.average_rating };
+    this.getPromotion = function(callbackFunc) {
+        return getPromotion(info.id, callbackFunc);
+    };
+
+    this.addPromotion = function(callbackFunc) {
+        var newCallbackFunc = function(error) {
+            if (error) {
+                console.log(error);
+            } else {
+                callbackFunc();
+            }
+        };
+        addPromotion(info.id, $('#promotion').val(), newCallbackFunc);
+    };
+
+    this.getAverageRate = function() { return info.average_rate };
 
     this.getNumVotes = function () { return info.num_votes };
 
-    this.addRating = function (rating, userId, created) {
-        if (!addRating(info.id)) {
-            console.log("ERROR");
-            return null;
-        }
-        info.average_rating = (info.average_rating * info.num_votes + rating) / (info.num_votes + 1);
-        ++info.num_votes;
+    this.addRate = function (rating) {
+        var callbackFunc = function(error) {
+            if (error) {
+                console.log(error)
+            } else {
+                info.average_rate = (info.average_rate * info.num_votes + rating) / (info.num_votes + 1);
+                ++info.num_votes;
+                card.onUpdateRating();
+            }
+        };
+        addRate(info.id, rating, id, Date(), callbackFunc);
     };
 
     this.addMarker = function () {
@@ -63,44 +93,63 @@ var ObjectModel = function(objectInfo) {
             cardOpened = false;
         }
     };
+
+    this.openCard = this.openCard.bind(this);
+    this.closeCard = this.closeCard.bind(this);
 };
 
 
-var getCategories = function() {  // API
-  return categories;
-};
+var MultiobjectModel = function(objectInfo) {
+    var info = objectInfo;  // verify all the fields
+    var card = null;
+    var cardOpened = false;
+    var childObjects = null;
 
-var getObjects = function () {
-    return objectInfos.map(function (objectInfo) { return new ObjectModel(objectInfo) });
-};
+    this.marker = null;
 
-var getComments = function(objectId) {  // API
-    return comments;
-};
+    getChildObjects(info.id, function(objs) { childObjects = objs; });
 
-var addComment = function(objectId, newComment) {  // API
-    // check text for overflow
-    comments.push(newComment);
-    return comments.length;
-};
+    this.isCardOpened = function () { return cardOpened; };
 
-var addObject = function(objectInfo) {  // API
-    // check description and title for overflow
-    // insert into DB and get id
-    var id = objects.length;
-    if (!id) {
-        console.log("ERROR");
-        return;
-    }
-    objectInfo.id = id;
-    var object = new ObjectModel(objectInfo);
-    objects.push(object);
-    return object;
-};
+    this.getId = function () { return info.id };
 
-var addRating = function(objectId, rating, userId, created) {  // API
-    // validate data
-    // insert into db
-    // update rating and num_votes for object
-    return 1;
+    this.getTitle = function () { return info.title };
+
+    this.getCoords = function () {
+        if (childObjects) {
+            return childObjects[0].getCoords();
+        }
+    };
+
+    this.getAddress = function () {
+        if (childObjects) {
+            return childObjects[0].getAddress();
+        }
+    };
+
+    this.getChildObjects = function() { return childObjects; };
+
+    this.addMarker = function () {
+        this.marker = new ObjectMarker(this);
+        this.marker.marker.addTo(mymap);
+    };
+
+    this.openCard = function() {
+        card = new MultiobjectCard(this);
+        card.addTo(mymap);
+        card.displayCard();
+        objectsWithOpenedCards.push(this);
+        cardOpened = true;
+    };
+
+    this.closeCard = function() {
+        if (card) {
+            card.remove();
+            objectsWithOpenedCards.pop();
+            cardOpened = false;
+        }
+    };
+
+    this.openCard = this.openCard.bind(this);
+    this.closeCard = this.closeCard.bind(this);
 };

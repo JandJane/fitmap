@@ -10,12 +10,20 @@ var CreateObjectManager = function (myMap) {
         newObject = {},
         creating = false;
 
-    var nextStep = function () {
+    var nextStep = function (nearbyObjects) {
         $('.dialog div.current').removeClass('current').addClass('hidden')
             .next().removeClass('hidden').addClass('current');
+        if (nearbyObjects) {
+            console.log(nearbyObjects);
+            nearbyObjects.forEach(
+                function(object) {
+                    $('.dialog #nearby-objects').append($('<p />', {text: object.getTitle()}));
+                }
+            )
+        }
     };
 
-    this.enterObjectData = function(e) {
+    this.onEnterAddress = function(e) {
         map.off('click');
         if (marker) {
             marker.dragging.disable();
@@ -81,12 +89,6 @@ var CreateObjectManager = function (myMap) {
         }
     };
 
-    this.saveObject = function () {
-        if (marker) {
-            reverseGeocode(marker.getLatLng(), this.createObject);
-        }
-    };
-
     this.cancelCreating = function () {
         creating = false;
         if (cancelButton) {
@@ -118,21 +120,38 @@ var CreateObjectManager = function (myMap) {
             lat_coordinate: marker.getLatLng().lat,
             lng_coordinate: marker.getLatLng().lng,
             address: data['display_name'],
-            created: Date(),
-            average_rating: 0,
+            created: new Date().toISOString().slice(0,10),
+            average_rate: 0,
             num_votes: 0,
             owner_id: 3
         };
-        var object = addObject(objectInfo);
-        console.log(marker.getLatLng());
-        displayObject(object); // what if null is returned?
+        addObject(objectInfo, displayObject); // what if null is returned?
         this.cancelCreating();
     };
 
+    this.saveObject = function() {
+        if (marker) {
+            reverseGeocode(marker.getLatLng(), this.createObject);
+        }
+    };
+
+    this.onEnterInfo = function () {
+        var createObjectFunc = this.createObject;
+        if (marker) {
+            var objectsNearby = getObjectsNearby(
+                marker.getLatLng(),
+                nextStep,
+                function (coords) {
+                    reverseGeocode(coords, createObjectFunc);
+                });
+        }
+    };
+
     this.enableSave = this.enableSave.bind(this);
-    this.saveObject = this.saveObject.bind(this);
+    this.onEnterInfo = this.onEnterInfo.bind(this);
     this.onClick = this.onClick.bind(this);
     this.createObject = this.createObject.bind(this);
+    this.saveObject = this.saveObject.bind(this);
 };
 
 
@@ -203,14 +222,28 @@ var ObjectCard = L.Control.extend({
     },
 
     onAdd: function (map) {
+        closeAllCards();
         this.card = L.DomUtil.create("div", "card");
         return this.card;
     },
 
     displayCard: function() {
-        var comments = this.object.getComments(); // what if null is returned?
-        renderObjectCard(this.card, this.object, comments, this.onAddComment);
-        addRating();
+        var callbackFunc = function(comments) {
+            var callbackFunc = function(promotion) {
+                renderObjectCard(this.card, this.object, comments, promotion, this.onAddComment);
+                addRating(this.object, id);
+            };
+            callbackFunc = callbackFunc.bind(this);
+            this.object.getPromotion(callbackFunc);
+        };
+        callbackFunc = callbackFunc.bind(this);
+        this.object.getComments(callbackFunc); // what if null is returned?
+
+    },
+
+    onUpdateRating: function() {
+        $('.card-rating-block p:first').text("Рейтинг: " + this.object.getAverageRate().toFixed(1));
+        $('.card-rating-block p:last').text("Оценок: " + this.object.getNumVotes());
     },
 
     onAddComment: function () {
@@ -220,8 +253,26 @@ var ObjectCard = L.Control.extend({
             author_id: 3,
             text: $('#comment').val()
         };
-        this.object.addComment(newComment); // what if null is returned?
-        this.displayCard();
+        this.object.addComment(newComment, this.displayCard); // what if null is returned?
+    }
+});
+
+
+var MultiobjectCard = L.Control.extend({
+    initialize: function (objectModel) {
+        this.object = objectModel;
+        this.card = null;
+        this.displayCard = this.displayCard.bind(this);
+    },
+
+    onAdd: function (map) {
+        closeAllCards();
+        this.card = L.DomUtil.create("div", "card");
+        return this.card;
+    },
+
+    displayCard: function() {
+        renderMultiobjectCard(this.card, this.object);
     }
 });
 
@@ -246,7 +297,6 @@ var ObjectMarker = function (objectModel) {
       if (object.isCardOpened()) {
           object.closeCard();
       } else {
-          closeAllCards();
           if (createObjectManager.isCreating()) {
               createObjectManager.cancelCreating();
           }

@@ -11,7 +11,7 @@
  */
 ;(function($, window, document, undefined)
 {
-    $.fn.webRating = function(settings)
+    $.fn.webRating = function(settings, object)
     {
         /**
          * settings and configuration data
@@ -60,7 +60,9 @@
                 // attribute
                 attribute       : "data-webRatingArg",
                 score           : "data-webRating", //Current rating
-                count           : "data-webRatingN" //Current count
+                count           : "data-webRatingN", //Current count
+
+                default_rating  : null
             };
 
         // overwrite configuration with custom user settings
@@ -240,6 +242,7 @@
                         } else {
                             var rating = $(this).parent().attr("id");
                             console.log(rating);
+                            object.addRate(parseInt(rating));
                         }
 
                         _ratingUpdateClickCount($(bgDiv), 1);
@@ -336,6 +339,11 @@
         function _init(){
             //Draw all starts with initial rating
             drawRatingStar();
+            if (configuration.default_rating) {
+                for (var i = 1; i <= configuration.default_rating; ++i) {
+                    $('#' + i).css('background-color', 'yellow');
+                }
+            }
         }
 
         /**

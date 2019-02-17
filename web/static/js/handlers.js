@@ -26,3 +26,20 @@ var search = function () {
     });
 };
 
+function toRad(value) {
+    // Converts numeric degrees to radians
+    return value * Math.PI / 180;
+}
+
+var distance = function (coords1, coords2) {
+    var deltaLat = toRad(coords2[0]-coords1[0]);
+    var deltaLon = toRad(coords2[1]-coords1[1]);
+
+    var a = Math.sin(deltaLat/2) * Math.sin(deltaLat/2) +
+        Math.cos(toRad(coords1[0])) * Math.cos(toRad(coords2[0])) *
+        Math.sin(deltaLon/2) * Math.sin(deltaLon/2);
+    var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+
+    return R * c;
+};
+
