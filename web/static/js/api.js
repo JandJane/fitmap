@@ -1,6 +1,12 @@
 
-var getCategories = function() {  // API
-    return categories;
+var getCategories = function(categories) {
+    $.get(
+        "http://127.0.0.1:5000/object_type", {},
+        function(response) {
+            console.log(response);
+            categories = response.json;
+        }
+    );
 };
 
 var getObjects = function (callbackFunc) {  // API

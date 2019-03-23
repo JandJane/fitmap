@@ -10,7 +10,7 @@ var R = 6371e3;  // Earth radius in meters
 var nearbyObjectsRadius = 50;  // in meters
 
 function init(){
-    categories = getCategories();
+    getCategories(categories);
 
     layers = {
         'Спорт': L.layerGroup(),
