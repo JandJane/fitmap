@@ -1,16 +1,38 @@
-
-var getCategories = function(categories) {
-    $.get(
-        "http://127.0.0.1:5000/object_type", {},
-        function(response) {
-            console.log(response);
-            categories = response.json;
+var getCategories = function() {
+    var categories;
+    $.ajax({
+    url : "http://127.0.0.1:5000/object_type",
+    type : "get",
+    async: false,
+    success: function(response) {
+            categories = response;
         }
-    );
-};
+    });
+    return categories;
+ };
 
-var getObjects = function (callbackFunc) {  // API
-    // Get non-private objects and private objects for the current user
+var getObjects = function (callbackFunc) {
+    // TODO Get non-private objects and private objects for the current user
+    var objectInfos;
+    $.ajax({
+    url : "http://127.0.0.1:5000/object",
+    type : "get",
+    async: false,
+    success: function(response) {
+            objectInfos = response;
+        }
+    });
+
+    var multiobjectInfos;
+        $.ajax({
+    url : "http://127.0.0.1:5000/multiobject",
+    type : "get",
+    async: false,
+    success: function(response) {
+            multiobjectInfos = response;
+        }
+    });
+
     objects = objectInfos.map(function (objectInfo) { return new ObjectModel(objectInfo) });
     multiobjects = multiobjectInfos.map(function (objectInfo) { return new MultiobjectModel(objectInfo) });
     callbackFunc(objects, multiobjects);
@@ -34,57 +56,92 @@ var getObjectsNearby = function(coords, callbackNonEmptyNearby, callbackEmptyNea
     }
 };
 
-var getChildObjects = function(id, callbackFunc) {  // API
+var getChildObjects = function(id, callbackFunc) {
     var childObjects = objects.filter(function(object) {
         return (object.getParentMultiobject() === id);
     });
     callbackFunc(childObjects);
 };
 
-var getPromotion = function(objectId, callbackFunc) {  // API
-    callbackFunc('Проводится акция!');
+var getPromotion = function(objectId, callbackFunc) {
+    $.ajax({
+        url : "http://127.0.0.1:5000/promotion/" + objectId,
+        type : "get",
+        async: false,
+        success: callbackFunc
+    });
 };
 
-var addPromotion = function(objectId, promotionText, callbackFunc) {  // API
+var addPromotion = function(objectId, promotionText, callbackFunc) {
     // check text for overflow
+    $.post(
+        "http://127.0.0.1:5000/promotion",
+        {
+            'text': promotionText,
+            'object_id': objectId
+        },
+        callbackFunc
+    );
 };
 
-var getComments = function(objectId, callbackFunc) {  // API
-    callbackFunc(comments);
+var getComments = function(objectId, callbackFunc) {
+    $.ajax({
+        url : "http://127.0.0.1:5000/comment/" + objectId,
+        type : "get",
+        async: false,
+        success: callbackFunc
+    });
 };
 
-var addComment = function(objectId, newComment, callbackFunc) {  // API
-    // check text for overflow
-    comments.push(newComment);
-    callbackFunc();
-};
-
-var addObject = function(objectInfo, callbackFunc) {  // API
+var addComment = function(objectId, newComment, callbackFunc) {
     // check description and title for overflow
-    // insert into DB and get id
-    var id = objects.length;
-    if (!id) {
-        console.log("ERROR");
-        return;
-    }
-    objectInfo.id = id;
-    var object = new ObjectModel(objectInfo);
-    objects.push(object);
-    callbackFunc(object);
+    $.post(
+        "http://127.0.0.1:5000/comment",
+        newComment,
+        callbackFunc
+    );
 };
 
-var addRate = function(objectId, rate, userId, created, callbackFunc) {  // API
-    // validate data
-    // insert into db
-    // update rating and num_votes for object
-    if (!ratings[userId]) {
-        ratings[userId] = {};
-    }
-    ratings[userId][objectId] = rate;
-    callbackFunc();
+var addObject = function(objectInfo, callbackFunc) {
+    console.log(objectInfo);
+    // check description and title for overflow, get id
+    $.post(
+        "http://127.0.0.1:5000/object",
+        objectInfo,
+        function(result) {
+            objectInfo.id = objects.length + 1;
+            var object = new ObjectModel(objectInfo);
+            objects.push(object);
+            callbackFunc(object);
+    });
 };
 
-var userRatedObject = function(userId, objectId, callbackFunc) {  // API
-    var rating = (ratings[userId] && ratings[userId][objectId]) ? ratings[userId][objectId] : 0;
+var getRates = function() {
+    var rates;
+    $.ajax({
+    url : "http://127.0.0.1:5000/rate",
+    type : "get",
+    async: false,
+    success: function(response) {
+            rates = response;
+        }
+    });
+    return rates;
+ };
+
+var addRate = function(objectId, rate, userId, created, callbackFunc) {
+    $.post(
+        "http://127.0.0.1:5000/rate",
+        {
+            "object_id": objectId,
+            "rate": rate,
+            "user_id": userId
+        },
+        callbackFunc
+    );
+};
+
+var userRatedObject = function(userId, objectId, callbackFunc) {
+    var rating = (rates[userId] && rates[userId][objectId]) ? rates[userId][objectId] : 0;
     callbackFunc(rating);
 };

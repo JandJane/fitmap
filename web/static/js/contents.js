@@ -77,7 +77,7 @@ var renderCreateObjectDialog = function(container) {
     $(container).append(header, step_one, step_two, step_three);
 };
 
-var renderObjectCard = function(container, object, comments, promotion, onAddComment) {
+var renderObjectCard = function(container, object, comments, promotion, onAddComment, onAddPromotion) {
     $(container).empty();
 
     // Header
@@ -88,7 +88,8 @@ var renderObjectCard = function(container, object, comments, promotion, onAddCom
     // Promotion block
     var promotionImg = $('<img />', {src: 'img/exclamation_mark.png', width: '20px', height: '20px', display: 'inline'});
     var promotionText = $('<p />').text(promotion).css({'color': 'red'});
-    var promotionBlock = $('<div />', {class: 'card-promotion-block'}).append(promotionImg, promotionText);
+    var promotionBlock = promotion ?
+        $('<div />', {class: 'card-promotion-block'}).append(promotionImg, promotionText) : null;
 
     // Info block
     var title = $('<p />').append($('<h3 />', {text: object.getTitle(), class: 'important'}));
@@ -121,8 +122,8 @@ var renderObjectCard = function(container, object, comments, promotion, onAddCom
         comments.forEach(function (comment) {
             displayCommentsBlock.append(
                 $('<div />').append(
-                    $('<p />', {text: comment.author_id, class: 'important'}),
-                    $('<p />', {text: comment.created, class: 'not-important'}),
+                    $('<p />', {text: usernames[comment.author_id], class: 'important'}),
+                    $('<p />', {text: comment.created.slice(5, 16), class: 'not-important'}),
                     $('<p />', {text: comment.text})
                 )
             );
@@ -147,7 +148,7 @@ var renderObjectCard = function(container, object, comments, promotion, onAddCom
             .append(
                 $('<p />', {
                     class: 'not-important',
-                    text: 'Объект добавлен ' + object.getOwnerId() + ' ' + object.getCreationDate()
+                    text: 'Объект добавлен пользователем ' + usernames[object.getOwnerId()] + ' ' + object.getCreationDate()
                 }));
     }
 
@@ -157,7 +158,7 @@ var renderObjectCard = function(container, object, comments, promotion, onAddCom
         .prop('id', 'promotion')
         .prop('placeholder', 'Проводится акция!');
     var addPromotionButton = $('<button></button>')
-        // .click(onAddPromotion)
+        .click(onAddPromotion)
         .text('Добавить');
     var addPromotionBlock = $('<div />', {class: 'card-add-block'})
         .append(addPromotionSubtitle, promotionInput, addPromotionButton);

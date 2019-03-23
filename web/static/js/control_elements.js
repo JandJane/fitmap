@@ -120,11 +120,12 @@ var CreateObjectManager = function (myMap) {
             lat_coordinate: marker.getLatLng().lat,
             lng_coordinate: marker.getLatLng().lng,
             address: data['display_name'],
-            created: new Date().toISOString().slice(0,10),
-            average_rate: 0,
+            created: new Date().toString(),
+            average_rating: 0,
             num_votes: 0,
             owner_id: 3
         };
+        console.log(objectInfo);
         addObject(objectInfo, displayObject); // what if null is returned?
         this.cancelCreating();
     };
@@ -218,6 +219,7 @@ var ObjectCard = L.Control.extend({
         this.object = objectModel;
         this.card = null;
         this.onAddComment = this.onAddComment.bind(this);
+        this.onAddPromotion = this.onAddPromotion.bind(this);
         this.displayCard = this.displayCard.bind(this);
     },
 
@@ -230,7 +232,7 @@ var ObjectCard = L.Control.extend({
     displayCard: function() {
         var callbackFunc = function(comments) {
             var callbackFunc = function(promotion) {
-                renderObjectCard(this.card, this.object, comments, promotion, this.onAddComment);
+                renderObjectCard(this.card, this.object, comments, promotion, this.onAddComment, this.onAddPromotion);
                 addRating(this.object, id);
             };
             callbackFunc = callbackFunc.bind(this);
@@ -238,7 +240,6 @@ var ObjectCard = L.Control.extend({
         };
         callbackFunc = callbackFunc.bind(this);
         this.object.getComments(callbackFunc); // what if null is returned?
-
     },
 
     onUpdateRating: function() {
@@ -249,11 +250,15 @@ var ObjectCard = L.Control.extend({
     onAddComment: function () {
         var newComment = {
             object_id: this.object.getId(),
-            created: new Date().toISOString().slice(0,10),
+            created: new Date().toString(),
             author_id: 3,
             text: $('#comment').val()
         };
         this.object.addComment(newComment, this.displayCard); // what if null is returned?
+    },
+
+    onAddPromotion: function () {
+        this.object.addPromotion($('#promotion').val(), this.displayCard);
     }
 });
 

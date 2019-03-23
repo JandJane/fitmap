@@ -32,9 +32,40 @@ class Object(Base):
     def __repr__(self):
        return """Object id='%d'\n %s\n %s\n type %d coords (%f, %f)\n %s Created %s
                 Average rating %f, num votes %d\n Owner %d\n Parent multiobject %d""" %\
-              (self.id.cast(int), self.title, self.description, self.type_id.cast(int), self.lat_coordinate.cast(float),
-               self.lng_coordinate.cast(float), self.address, self.created, self.average_rating.cast(float),
-               self.num_votes.cast(int), self.owner_id.cast(int), self.parent_multiobject_id.cast(int))
+              (self.id, self.title, self.description, self.type_id, self.lat_coordinate,
+               self.lng_coordinate, self.address, self.created, self.average_rating,
+               self.num_votes, self.owner_id, self.parent_multiobject_id if self.parent_multiobject_id else -1)
+
+
+class MultiObject(Base):
+    __tablename__ = 'multiobjects'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    title = Column(String)
+
+
+class Comment(Base):
+    __tablename__ = 'comments'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    object_id = Column(Integer)
+    created = Column(DateTime)
+    author_id = Column(Integer)
+    text = Column(Text)
+
+
+class Rate(Base):
+    __tablename__ = 'rates'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    object_id = Column(Integer)
+    user_id = Column(Integer)
+    rate = Column(Integer)
+
+
+class Promotion(Base):
+    __tablename__ = 'promotions'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    object_id = Column(Integer)
+    text = Column(Text)
+
 
 Object.type = relationship("ObjectType", back_populates="objects")
 ObjectType.objects = relationship("Object", order_by=Object.id, back_populates="type")

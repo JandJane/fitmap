@@ -4,13 +4,16 @@ var createObjectManager;
 var layers;
 var objectsWithOpenedCards = [];
 var objects;
+var multiobjects;
+var rates;
 var id = 3;
 
 var R = 6371e3;  // Earth radius in meters
 var nearbyObjectsRadius = 50;  // in meters
 
 function init(){
-    getCategories(categories);
+    categories = getCategories();
+    rates = getRates();
 
     layers = {
         'Спорт': L.layerGroup(),

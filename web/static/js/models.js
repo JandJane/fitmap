@@ -23,55 +23,44 @@ var ObjectModel = function(objectInfo) {
 
     this.getOwnerId = function() { return info.owner_id; };
 
-    this.getCreationDate = function() { return info.created; };
+    this.getCreationDate = function() { return objectInfo.created.slice(4, 16); };
 
-    this.getParentMultiobject = function () { return info.parent_multiobject; };
+    this.getParentMultiobject = function () { return info.parent_multiobject_id; };
 
     this.getComments = function(callbackFunc) {
         return getComments(info.id, callbackFunc);
     };
 
     this.addComment = function(newComment, callbackFunc) {
-        var newCallbackFunc = function(error) {
-            if (error) {
-                console.log(error);
-            } else {
-                callbackFunc();
-            }
-        };
-        addComment(info.id, newComment, newCallbackFunc);
+        addComment(info.id, newComment, callbackFunc);
+    };
+
+    this.addPromotion = function(promotionText, callbackFunc) {
+        addPromotion(info.id, promotionText, callbackFunc);
     };
 
     this.getPromotion = function(callbackFunc) {
         return getPromotion(info.id, callbackFunc);
     };
 
-    this.addPromotion = function(callbackFunc) {
-        var newCallbackFunc = function(error) {
-            if (error) {
-                console.log(error);
-            } else {
-                callbackFunc();
-            }
-        };
-        addPromotion(info.id, $('#promotion').val(), newCallbackFunc);
-    };
-
-    this.getAverageRate = function() { return info.average_rate };
+    this.getAverageRate = function() { return info.average_rating };
 
     this.getNumVotes = function () { return info.num_votes };
 
     this.addRate = function (rating) {
-        var callbackFunc = function(error) {
-            if (error) {
-                console.log(error)
-            } else {
-                info.average_rate = (info.average_rate * info.num_votes + rating) / (info.num_votes + 1);
+        var callbackFunc = function() {
+                info.average_rating = (info.average_rating * info.num_votes + rating) / (info.num_votes + 1);
                 ++info.num_votes;
+                if (!rates[id]) {
+                    rates[id] = {};
+                }
+                rates[id][info.id] = rating;
                 card.onUpdateRating();
-            }
         };
         addRate(info.id, rating, id, Date(), callbackFunc);
+        getRates();
+        console.log(rates);
+
     };
 
     this.addMarker = function () {
@@ -152,4 +141,10 @@ var MultiobjectModel = function(objectInfo) {
 
     this.openCard = this.openCard.bind(this);
     this.closeCard = this.closeCard.bind(this);
+};
+
+var dateFormatOptions = {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric'
 };
