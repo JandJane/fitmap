@@ -4,7 +4,7 @@ from sqlalchemy.orm import sessionmaker
 
 from database.models import *
 
-engine = create_engine('sqlite:///../alcora_database.db', echo=True)
+engine = create_engine('sqlite:///C:\\Users\\foggy\\Documents\\alcora\\alcora_database.db', echo=True)
 
 Base.metadata.create_all(engine)
 

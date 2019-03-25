@@ -3,7 +3,7 @@ from flask_restful import Api, Resource, reqparse
 
 from database.db import Database
 
-db = Database('alcora_database.db')
+db = Database('C:\\Users\\foggy\\Documents\\alcora\\alcora_database.db')
 app = Flask(__name__)
 api = Api(app)
 
